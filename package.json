@@ -1,20 +1,19 @@
 {
-  "name": "renaissance-image-generator-react",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
+  "name": "faithtech-hackathon",
+  "version": "1.0.0",
+  "description": "AI-powered image generation for Alpha stories",
+  "main": "server.js",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "node server.js",
+    "start": "node server.js",
+    "python-server": "python3 -m http.server 8000"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
   },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.9"
-  }
+  "keywords": ["ai", "image-generation", "alpha", "faithtech"],
+  "author": "FaithTech Hackathon Team",
+  "license": "MIT"
 }
-

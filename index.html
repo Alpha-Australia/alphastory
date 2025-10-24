@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaithTech</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background-image: url('assets/clouds.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .hand-left, .hand-right {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .hand-left {
+            left: 0;
+            max-width: 750px;
+            height: auto;
+        }
+
+        .hand-right {
+            right: 0;
+            max-width: 750px;
+            height: auto;
+            transform: translateY(-50%) scaleX(1); /* Remove flip - keep original orientation */
+        }
+
+        .hand-left:hover, .hand-right:hover {
+            opacity: 1;
+        }
+
+        .textbox-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        @media (max-width: 1200px) {
+            .hand-left, .hand-right {
+                max-width: 625px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .hand-left, .hand-right {
+                max-width: 500px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hand-left, .hand-right {
+                display: none; /* Hide on very small screens */
+            }
+        }
+
+        .story-box {
+            width: 100%;
+            height: 50px;
+            padding: 15px 20px 35px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.8em;
+            font-family: 'Georgia', serif;
+            line-height: 1.2;
+            resize: none;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .story-box:hover {
+            height: 60px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+            cursor: pointer;
+        }
+
+        .story-box:focus {
+            height: 200px;
+            padding: 30px 30px 40px 30px;
+            font-size: 0.9em;
+            line-height: 1.6;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+            border-radius: 20px;
+            overflow-y: auto;
+            cursor: text;
+        }
+
+        .story-box::placeholder {
+            color: rgba(0, 0, 0, 0.4);
+            font-style: italic;
+            text-align: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .story-box:focus::placeholder {
+            opacity: 0.3;
+        }
+
+        .instruction-text {
+            position: absolute;
+            bottom: 8px;
+            right: 15px;
+            font-size: 0.7em;
+            color: rgba(0, 0, 0, 0.3);
+            font-style: italic;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .story-box:focus + .instruction-text {
+            opacity: 1;
+        }
+
+        .image-result {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 80vw;
+            max-height: 80vh;
+            border-radius: 15px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+        }
+
+        .image-result img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 15px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .story-box.loading {
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            padding: 0;
+            font-size: 0;
+            background: rgba(255, 255, 255, 0.9);
+            animation: spin 1s linear infinite;
+            transform: translateY(-50%) translateX(-50%);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .story-box.loading::placeholder {
+            opacity: 0;
+        }
+
+        .instruction-text.loading {
+            opacity: 0 !important;
+        }
+
+        .textbox-container.loading .instruction-text {
+            opacity: 0 !important;
+        }
+
+        @keyframes spin {
+            0% { transform: translateY(-50%) translateX(-50%) rotate(0deg); }
+            100% { transform: translateY(-50%) translateX(-50%) rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .story-box {
+                padding: 25px;
+                font-size: 1.1em;
+            }
+        }
+    </style>
+  </head>
+  <body>
+    <img src="assets/left.png" alt="Left Hand" class="hand-left">
+    <img src="assets/right.png" alt="Right Hand" class="hand-right">
+    
+    <div class="textbox-container">
+        <textarea 
+            class="story-box" 
+            id="storyInput" 
+            placeholder="Share your story..."
+        ></textarea>
+        <div class="instruction-text">Press Enter to submit</div>
+    </div>
+
+
+    <div class="image-result" id="imageResult">
+        <button class="close-btn" onclick="closeImage()">×</button>
+        <img id="resultImage" src="" alt="Generated Artwork">
+    </div>
+
+    <script>
+        let currentImageUrl = null;
+
+        // Handle Enter key press only
+        document.getElementById('storyInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const story = this.value.trim();
+                if (story.length > 10) {
+                    generateImage();
+                }
+            }
+        });
+
+        async function generateImage() {
+            const story = document.getElementById('storyInput').value.trim();
+            const textbox = document.getElementById('storyInput');
+            const instruction = document.querySelector('.instruction-text');
+            const container = document.querySelector('.textbox-container');
+            
+            if (!story || story.length < 10) {
+                return;
+            }
+
+            // Transform textbox into spinning circle
+            textbox.classList.add('loading');
+            instruction.classList.add('loading');
+            container.classList.add('loading');
+
+            try {
+                // Renaissance-style prompt
+                const fullPrompt = `Renaissance-style painting of ${story}, featuring opulent details and rich colors, oil painting, sfumato technique, chiaroscuro dramatic lighting and shadows, classical composition with balanced symmetry, realistic human anatomy and proportions, elaborate period-appropriate costumes and drapery, intricate architectural details, atmospheric perspective, masterful brushwork in the manner of Leonardo da Vinci, Raphael, Titian, or Botticelli, 15th-16th century Italian Renaissance art style, highly detailed and realistic`;
+
+                console.log('Generating image for:', story.substring(0, 50) + '...');
+
+                const response = await fetch('/api/generate-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: fullPrompt,
+                        model: 'dall-e-3',
+                        n: 1,
+                        size: '1024x1024',
+                        quality: 'hd',
+                        style: 'vivid'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error?.message || 'Failed to generate image');
+                }
+
+                // Show image result
+                currentImageUrl = data.data[0].url;
+                document.getElementById('resultImage').src = currentImageUrl;
+                document.getElementById('imageResult').style.display = 'block';
+
+            } catch (error) {
+                console.error('Error generating image:', error);
+            } finally {
+                // Reset textbox to normal state
+                textbox.classList.remove('loading');
+                instruction.classList.remove('loading');
+                container.classList.remove('loading');
+            }
+        }
+
+        function closeImage() {
+            document.getElementById('imageResult').style.display = 'none';
+        }
+
+        // Close image when clicking outside
+        document.getElementById('imageResult').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeImage();
+            }
+        });
+
+        // Close image with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeImage();
+            }
+        });
+    </script>
+  </body>
+  </html>

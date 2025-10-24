@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veronese-Style Alpha Stories Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8b5a3c 0%, #5c3d2e 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .left-panel, .right-panel {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .reference-section {
+            margin-bottom: 20px;
+        }
+
+        .reference-image {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+        }
+
+        .story-selector {
+            margin-bottom: 20px;
+        }
+
+        .story-selector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #5c3d2e;
+        }
+
+        .story-selector select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            font-family: 'Georgia', serif;
+        }
+
+        .story-display {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #8b5a3c;
+            margin-bottom: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .story-display h3 {
+            color: #5c3d2e;
+            margin-bottom: 10px;
+        }
+
+        .story-display p {
+            line-height: 1.6;
+            color: #333;
+            font-size: 0.9em;
+        }
+
+        .api-key-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff9e6;
+            border-radius: 8px;
+            border: 1px solid #ffe066;
+        }
+
+        .api-key-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #5c3d2e;
+        }
+
+        .api-key-section input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-family: monospace;
+        }
+
+        .style-options {
+            margin-bottom: 20px;
+        }
+
+        .style-options label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #5c3d2e;
+        }
+
+        .style-options select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            font-family: 'Georgia', serif;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #8b5a3c 0%, #5c3d2e 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .veronese-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .image-container {
+            width: 100%;
+            height: 500px;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .placeholder {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #8b5a3c;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #c62828;
+        }
+
+        .prompt-preview {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #4a90e2;
+        }
+
+        .prompt-preview h4 {
+            color: #4a90e2;
+            margin-bottom: 10px;
+        }
+
+        .prompt-preview p {
+            font-family: monospace;
+            font-size: 0.85em;
+            line-height: 1.4;
+            color: #333;
+            white-space: pre-wrap;
+        }
+
+        .veronese-description {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4caf50;
+        }
+
+        .veronese-description h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .veronese-description p {
+            font-size: 0.9em;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Veronese-Style Alpha Stories Generator</h1>
+            <p>Transform Alpha testimonies into grand Renaissance banquet scenes inspired by Paolo Veronese</p>
+        </div>
+
+        <div class="content">
+            <div class="left-panel">
+                <div class="reference-section">
+                    <h2>📖 Reference: Paolo Veronese Style</h2>
+                    <img src="data/reference_images/Paolo_Veronese_008.jpg" alt="Paolo Veronese Reference" class="reference-image">
+                    
+                    <div class="veronese-description">
+                        <h4>🎭 Veronese Style Characteristics</h4>
+                        <p>Grand Renaissance banquet scenes, opulent architectural settings, multiple levels with balconies, classical columns, vibrant Venetian colors (deep reds, blues, golds), numerous figures in rich 16th-century attire, dramatic lighting, sense of celebration and abundance, theatrical composition with musicians and servants.</p>
+                    </div>
+                </div>
+
+                <div class="story-selector">
+                    <label for="storySelect">Choose an Alpha Story:</label>
+                    <select id="storySelect">
+                        <option value="">Select a story...</option>
+                    </select>
+                </div>
+
+                <div class="story-display" id="storyDisplay">
+                    <h3>Story Preview</h3>
+                    <p>Select a story from the dropdown above to see it here.</p>
+                </div>
+
+                <div class="button-group">
+                    <button onclick="loadRandomStory()" class="veronese-btn">🎲 Random Story</button>
+                    <button onclick="loadStoryById(1)">📖 Nick's Story</button>
+                    <button onclick="loadStoryById(5)">🏥 Dr. Tridiv's Story</button>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <h2>🎨 Generate Veronese-Style Image</h2>
+                
+                <div class="api-key-section">
+                    <label>🔑 API Configuration</label>
+                    <div style="background: #e8f5e8; padding: 10px; border-radius: 6px; margin-top: 8px;">
+                        <strong>✅ Server-side API Key</strong><br>
+                        <small>API key is securely stored in .env file on the server</small>
+                    </div>
+                    <button onclick="checkApiStatus()" style="margin-top: 10px; padding: 8px 16px; background: #4caf50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        🔍 Check API Status
+                    </button>
+                </div>
+
+                <div class="style-options">
+                    <label for="styleIntensity">Style Intensity</label>
+                    <select id="styleIntensity">
+                        <option value="subtle">Subtle Veronese Influence</option>
+                        <option value="moderate" selected>Moderate Veronese Style</option>
+                        <option value="strong">Strong Veronese Style</option>
+                        <option value="exact">Exact Veronese Replication</option>
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <button onclick="generateVeroneseImage()" id="generateBtn">🎨 Generate Veronese Image</button>
+                    <button onclick="previewVeronesePrompt()" id="previewBtn">👁️ Preview Prompt</button>
+                </div>
+
+                <div class="image-container" id="imageContainer">
+                    <div class="placeholder" id="placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p>Your Veronese-style masterpiece will appear here</p>
+                    </div>
+                </div>
+
+                <div id="error" style="display: none;" class="error"></div>
+                <div id="promptPreview" style="display: none;" class="prompt-preview"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="csv-stories.js"></script>
+    <script>
+        let currentStory = null;
+        let currentImageUrl = null;
+
+        // Veronese-style prompt templates based on intensity
+        const veronesePrompts = {
+            subtle: 'Renaissance-style painting of {story}, featuring opulent details and rich colors, oil painting, classical composition with balanced symmetry, realistic human anatomy and proportions, elaborate period-appropriate costumes and drapery, intricate architectural details, atmospheric perspective, masterful brushwork in the manner of Paolo Veronese, 16th century Venetian Renaissance art style, highly detailed and realistic',
+
+            moderate: 'Grand Renaissance oil painting in the style of Paolo Veronese depicting {story}, featuring opulent banquet hall setting with classical columns and multiple levels, numerous figures in rich 16th-century Venetian attire, vibrant colors dominated by deep reds, blues, and golds, dramatic chiaroscuro lighting, theatrical composition with musicians and servants, sense of celebration and abundance, oil painting technique with sfumato and atmospheric perspective, highly detailed architectural background with balconies and staircases',
+
+            strong: 'Elaborate Renaissance masterpiece in the exact style of Paolo Veronese showing {story}, set within a grand Venetian palace banquet hall with opulent architectural details including Corinthian columns, multiple balconies, and classical statuary, numerous figures dressed in sumptuous 16th-century Venetian costumes in vibrant colors of deep red, royal blue, emerald green, and gold, dramatic theatrical lighting with strong chiaroscuro, bustling scene with musicians playing period instruments, servants carrying dishes, dogs and other animals, long banquet table laden with food and wine, sense of joyful celebration and spiritual significance, oil painting with masterful brushwork, rich textures, and atmospheric perspective',
+
+            exact: 'Exact replication of Paolo Veronese\'s painting style depicting {story}, featuring the characteristic grand banquet scene within an opulent Venetian palace interior, multiple architectural levels with classical columns and balustraded balconies, numerous figures in authentic 16th-century Venetian Renaissance attire with rich fabrics and colors, dramatic lighting with strong contrasts, musicians in the foreground playing lutes and viols, servants and attendants throughout, domestic animals including dogs, long banquet table with period-appropriate food and vessels, theatrical composition with figures interacting across multiple planes, vibrant Venetian color palette of deep reds, blues, greens, and golds, oil painting technique with sfumato, chiaroscuro, and atmospheric perspective, highly detailed architectural elements and classical statuary'
+        };
+
+        // Initialize the page
+        window.addEventListener('DOMContentLoaded', () => {
+            populateStoryDropdown();
+            loadSavedApiKey();
+        });
+
+        function populateStoryDropdown() {
+            const select = document.getElementById('storySelect');
+            const stories = getAllStories();
+            
+            stories.forEach(story => {
+                const option = document.createElement('option');
+                option.value = story.id;
+                option.textContent = `Story ${story.id}: ${story.story.substring(0, 50)}...`;
+                select.appendChild(option);
+            });
+
+            // Add event listener for dropdown change
+            select.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    loadStoryById(parseInt(e.target.value));
+                }
+            });
+        }
+
+        function loadStoryById(id) {
+            const story = getStoryById(id);
+            if (story) {
+                currentStory = story;
+                displayStory(story);
+                document.getElementById('storySelect').value = id;
+            }
+        }
+
+        function loadRandomStory() {
+            const story = getRandomStory();
+            currentStory = story;
+            displayStory(story);
+            document.getElementById('storySelect').value = story.id;
+        }
+
+        function displayStory(story) {
+            const storyDisplay = document.getElementById('storyDisplay');
+            storyDisplay.innerHTML = `
+                <h3>Story ${story.id}</h3>
+                <p>${story.story}</p>
+                ${story.source ? `<small><strong>Source:</strong> ${story.source}</small>` : ''}
+            `;
+        }
+
+        async function checkApiStatus() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                if (data.hasApiKey) {
+                    showError('✅ API key is configured and ready!', 'success');
+                } else {
+                    showError('❌ API key not found in .env file', 'error');
+                }
+            } catch (error) {
+                showError('❌ Cannot connect to server. Make sure to run: npm run dev', 'error');
+            }
+        }
+
+        function previewVeronesePrompt() {
+            if (!currentStory) {
+                showError('Please select a story first.');
+                return;
+            }
+
+            const styleIntensity = document.getElementById('styleIntensity').value;
+            const promptTemplate = veronesePrompts[styleIntensity];
+            const fullPrompt = promptTemplate.replace('{story}', currentStory.story);
+
+            const previewDiv = document.getElementById('promptPreview');
+            previewDiv.innerHTML = `
+                <h4>Generated Veronese-Style Prompt</h4>
+                <p>${fullPrompt}</p>
+            `;
+            previewDiv.style.display = 'block';
+        }
+
+        async function generateVeroneseImage() {
+            if (!currentStory) {
+                showError('Please select a story first.');
+                return;
+            }
+
+            const styleIntensity = document.getElementById('styleIntensity').value;
+            const errorDiv = document.getElementById('error');
+            const generateBtn = document.getElementById('generateBtn');
+            const placeholder = document.getElementById('placeholder');
+
+            // Reset error
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+
+            // Show loading
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Generating...';
+
+            placeholder.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Creating your Veronese masterpiece...</p>
+                </div>
+            `;
+
+            try {
+                // Get the Veronese-style prompt template and insert the story
+                const promptTemplate = veronesePrompts[styleIntensity];
+                const fullPrompt = promptTemplate.replace('{story}', currentStory.story);
+
+                console.log('Generated Veronese Prompt:', fullPrompt);
+
+                const response = await fetch('/api/generate-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: fullPrompt,
+                        model: 'dall-e-3',
+                        n: 1,
+                        size: '1024x1024',
+                        quality: 'hd',  // Use HD quality for better results
+                        style: 'vivid'  // Use vivid style for more dramatic colors
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error?.message || 'Failed to generate image');
+                }
+
+                // Display image
+                currentImageUrl = data.data[0].url;
+                placeholder.innerHTML = `<img src="${currentImageUrl}" alt="Generated Veronese-Style Image">`;
+
+                console.log('Veronese-style image generated successfully:', currentImageUrl);
+
+            } catch (error) {
+                showError(`Error: ${error.message}`);
+                placeholder.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p>Your Veronese-style masterpiece will appear here</p>
+                `;
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '🎨 Generate Veronese Image';
+            }
+        }
+
+        function showError(message, type = 'error') {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            if (type === 'success') {
+                errorDiv.className = 'error';
+                errorDiv.style.background = '#e8f5e8';
+                errorDiv.style.color = '#2e7d32';
+                errorDiv.style.borderLeft = '4px solid #4caf50';
+            } else {
+                errorDiv.className = 'error';
+                errorDiv.style.background = '#ffebee';
+                errorDiv.style.color = '#c62828';
+                errorDiv.style.borderLeft = '4px solid #c62828';
+            }
+        }
+    </script>
+</body>
+</html>

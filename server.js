@@ -9,13 +9,9 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-<<<<<<< HEAD
 
 // Serve assets folder publicly
 app.use("/assets", express.static(path.join(__dirname, "assets")));
-=======
-app.use(express.static('.'));
->>>>>>> f75587c (Update basic UI)
 
 // Proxy endpoint for OpenAI API calls
 app.post('/api/generate-image', async (req, res) => {

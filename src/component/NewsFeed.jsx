@@ -4,6 +4,11 @@ export default function NewsFeed({ stories = [] }) {
   const [selectedStory, setSelectedStory] = useState(null);
   const [currentFilter, setCurrentFilter] = useState("all");
 
+  // Debug logs
+  console.log("📊 NewsFeed rendered with stories:", stories.length);
+  console.log("📊 selectedStory state:", selectedStory);
+  console.log("📊 First story:", stories[0]);
+
   // Use stories prop instead of imported alphaStories
   const filteredStories =
     currentFilter === "all"
@@ -16,7 +21,11 @@ export default function NewsFeed({ stories = [] }) {
   };
 
   const openModal = (story) => {
+    console.log("🎯 openModal called with story:", story);
+    console.log("🎯 Story name:", story?.name);
+    console.log("🎯 Story id:", story?.id);
     setSelectedStory(story);
+    console.log("🎯 selectedStory state should be set now");
   };
 
   const closeModal = () => {
@@ -25,31 +34,6 @@ export default function NewsFeed({ stories = [] }) {
 
   return (
     <div className="min-h-screen bg-white p-4">
-      {/* Filter Buttons */}
-      <div className="mb-6 flex justify-center gap-4">
-        <button
-          onClick={() => setCurrentFilter("all")}
-          className={`px-6 py-2 rounded-full font-medium transition-colors ${
-            currentFilter === "all"
-              ? "bg-[#ef4444] text-white"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-          }`}
-        >
-          All Stories ({stories.length})
-        </button>
-        <button
-          onClick={() => setCurrentFilter("church")}
-          className={`px-6 py-2 rounded-full font-medium transition-colors ${
-            currentFilter === "church"
-              ? "bg-[#ef4444] text-white"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-          }`}
-        >
-          Church Stories ({stories.filter((s) => s.church !== "Unknown").length}
-          )
-        </button>
-      </div>
-
       {/* Images Grid - 3 Columns with Gaps */}
       <div className="grid grid-cols-3 gap-6">
         {filteredStories.map((story) => (
@@ -68,93 +52,64 @@ export default function NewsFeed({ stories = [] }) {
       </div>
 
       {/* Modal - Fixed positioning and click handlers */}
+      {console.log("🎭 Modal check - selectedStory:", selectedStory)}
       {selectedStory && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(160, 160, 160, 0.8)",
+            zIndex: 99999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }}
           onClick={closeModal}
         >
+          {console.log("🎭 Modal should be visible now!")}
           <div
-            className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            style={{
+              backgroundColor: "white",
+              borderRadius: "12px",
+              maxWidth: "500px",
+              width: "100%",
+              maxHeight: "90vh",
+              overflow: "auto",
+              padding: "20px",
+            }}
             onClick={(e) => {
               e.stopPropagation();
               console.log("Clicked inside modal"); // Debug log
             }}
           >
-            {/* Modal Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-800">
-                {selectedStory.name}'s Story
-              </h2>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  closeModal();
-                }}
-                className="bg-[#ef4444] hover:bg-[#dc2626] text-white text-lg font-normal w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#ef4444] focus:ring-offset-2"
-                aria-label="Close modal"
-              >
-                ×
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-6">
-              {/* Story Image */}
-              <div className="mb-4">
-                <img
-                  src={selectedStory.image}
-                  alt={`${selectedStory.name}'s story`}
-                  className="w-full h-64 object-cover rounded-lg"
-                />
-              </div>
-
-              {/* Church/Location Info */}
-              <div className="mb-4">
-                <p className="text-gray-500 flex items-center">
-                  <svg
-                    className="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  {selectedStory.church}
-                </p>
-              </div>
-
-              {/* Full Story Text */}
-              <div className="prose prose-gray max-w-none">
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                  {selectedStory.story}
-                </p>
-              </div>
-
-              {/* Optional Source Link */}
-              {selectedStory.source && (
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <a
-                    href={selectedStory.source}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#ef4444] hover:text-[#dc2626] text-sm font-medium"
-                  >
-                    Read more at {selectedStory.source} →
-                  </a>
-                </div>
-              )}
-            </div>
+            <h2 style={{ fontSize: "24px", marginBottom: "20px" }}>
+              {selectedStory.name}'s Story
+            </h2>
+            <button
+              onClick={closeModal}
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                backgroundColor: "#999999ff",
+                color: "white",
+                border: "none",
+                borderRadius: "100%",
+                width: "30px",
+                height: "30px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              ×
+            </button>
+            <p>{selectedStory.story}</p>
           </div>
         </div>
       )}

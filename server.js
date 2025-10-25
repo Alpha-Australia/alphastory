@@ -11,8 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // Serve assets folder publicly
-app.use(express.static("assets"));
-app.use("/public", express.static(path.join(__dirname, "assets")));
+app.use("/assets", express.static(path.join(__dirname, "assets")));
 
 // Proxy endpoint for OpenAI API calls
 app.post('/api/generate-image', async (req, res) => {

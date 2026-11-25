@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "server": "node server.js",
 
-    "start": "node server.js",
+    "start": "vite build && node server.js",
     "python-server": "python3 -m http.server 8000"
   },
   "dependencies": {

@@ -67,12 +67,16 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Serve the main app
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+// Serve the built frontend (output of `vite build`)
+const distDir = path.join(__dirname, 'dist');
+app.use(express.static(distDir));
+
+// Fall back to the app for any non-API route
+app.get(/^(?!\/api(\/|$)).*/, (req, res) => {
+    res.sendFile(path.join(distDir, 'index.html'));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 FaithTech server running on http://localhost:${PORT}`);
     console.log(`📝 API key configured: ${process.env.OPENAI_API_KEY ? 'Yes' : 'No'}`);
     console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);

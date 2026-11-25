@@ -1,3 +1,6 @@
+# Vite build output
+dist/
+
 # Generated output images and prompts
 data/output/
 
